@@ -26,13 +26,12 @@ config.gpu_options.allow_growth=True
 #%%
 
 dataset_name='test_data.npz'
-#dataset_name='/Shared/lss_haggarwal/All_datasets/epi7sub/diffusion_mri_dataset.npz'
+model_name='30Jan_0550pm_7lay_60E_4Shots'
 
-model_name='30Jan_0550pm_7lay_60E'
-
-
+nShots=4
+sigma=.01
 #%%Read the testing data from dataset.hdf5 file
-tstOrg,tstAtb,tstCsm,tstMask=rd.getTstData(dataset_name)
+tstOrg,tstAtb,tstCsm,tstMask=rd.getTstDataNshots(dataset_name,nShots,sigma)
 nImg=tstAtb.shape[0]
 
 #%% Load existing model. Then do the reconstruction

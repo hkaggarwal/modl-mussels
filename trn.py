@@ -46,17 +46,17 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth=True
 
 #--------------------Set some parameters------------------
-
+nShots=4 # simulate N-Shots data
 epochs=50 #number of training epoches
 K=1 #number of unrolls, maximum value of 5 for a 12-GB gpu but 1 should be OK too.
-lamI,lamK=.01,.01 # regularization parameters for image and k-space
-sigma=.003 #small amount of noise in k-space
+lamI,lamK=.05,.01 # regularization parameters for image and k-space
+sigma=.005 #small amount of noise in k-space
 
 # Please download the training dataset (320 MB around) from this link:
 #dataset link: https://drive.google.com/open?id=10Blm-wX8ofyqLQ6w1qFcm7P-j5vcus6-
 
 dataset_name='diffusion_mri_dataset.npz' #training dataset full file name
-
+dataset_name='/Shared/lss_haggarwal/All_datasets/epi7sub/diffusion_mri_dataset.npz'
 
 #%%Generate a meaningful filename to save the trainined models for testing
 print ('*************************************************')
@@ -64,22 +64,23 @@ start_time=time.time()
 saveDir='trained_model/'
 cwd=os.getcwd()
 directory=saveDir+datetime.now().strftime("%d%b_%I%M%S%P_")+ \
-        str(epochs)+'E_'+str(K)+'K'
+        str(epochs)+'E_'+str(K)+'K_'+str(nShots)+'Shots'
 
 if not os.path.exists(directory):
     os.makedirs(directory)
 sessFileName= directory+'/model'
 
 #%% prepare data
-trnOrg,trnAtb,trnCsm,trnMask=rd.getTrnData(dataset_name,sigma)
+trnOrg,trnAtb,trnCsm,trnMask=rd.getTrnDataNshots(dataset_name,nShots,sigma)
 nImg=trnOrg.shape[0]
 #%% save the test model
 #The postfix T stands for a tensor just for nomenlcature
+#We had compressed the coil sensitivities to have just 4 coils. Hence fixed.
 tf.reset_default_graph()
 
-atbT  = tf.placeholder(tf.complex64,shape=(None,4,256,256),name='atb')
+atbT  = tf.placeholder(tf.complex64,shape=(None,nShots,256,256),name='atb')
 csmT  = tf.placeholder(tf.complex64,shape=(None,4,256,256),name='csm')
-maskT = tf.placeholder(tf.complex64,shape=(None,4,256,256),name='mask')
+maskT = tf.placeholder(tf.complex64,shape=(None,nShots,256,256),name='mask')
 
 with tf.device('/gpu:0'):
     predTst=modl_mussles(atbT,csmT,maskT,lamK,lamI,K)
@@ -100,10 +101,10 @@ nSteps= nBatch*epochs
 
 
 tf.reset_default_graph()
-orgP = tf.placeholder(tf.complex64,shape=(None,4,256,256),name='org')
-atbP  = tf.placeholder(tf.complex64,shape=(None,4,256,256),name='atb')
+orgP = tf.placeholder(tf.complex64,shape=(None,nShots,256,256),name='org')
+atbP  = tf.placeholder(tf.complex64,shape=(None,nShots,256,256),name='atb')
 csmP  = tf.placeholder(tf.complex64,shape=(None,4,256,256),name='csm')
-maskP = tf.placeholder(tf.complex64,shape=(None,4,256,256),name='mask')
+maskP = tf.placeholder(tf.complex64,shape=(None,nShots,256,256),name='mask')
 
 trnData = tf.data.Dataset.from_tensor_slices((orgP,atbP,csmP,maskP))
 trnData = trnData.cache()

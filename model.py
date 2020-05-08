@@ -88,12 +88,13 @@ def Dw(inp):
 
     with tf.name_scope('myModel'):
         inp1=sf.c2rT(inp)
+        c=inp1.shape.as_list()[-1]
         mn=tf.reduce_mean(inp1,axis=(-2,-3))
         st=tf.keras.backend.std(inp1)
         tfn=tf.newaxis
         inp1=(inp1-mn[:,tfn,tfn])/st
         with tf.variable_scope('unet',reuse=tf.AUTO_REUSE):
-            nw=smallModel(inp1,8,True)
+            nw=smallModel(inp1,c,True)
             nw=nw+inp1
         mn2=tf.reduce_mean(nw,axis=(-2,-3))
         nw=(nw-mn2[:,tfn,tfn])
