@@ -56,7 +56,7 @@ sigma=.005 #small amount of noise in k-space
 #dataset link: https://drive.google.com/open?id=10Blm-wX8ofyqLQ6w1qFcm7P-j5vcus6-
 
 dataset_name='diffusion_mri_dataset.npz' #training dataset full file name
-dataset_name='/Shared/lss_haggarwal/All_datasets/epi7sub/diffusion_mri_dataset.npz'
+#dataset_name='/Shared/lss_haggarwal/All_datasets/epi7sub/diffusion_mri_dataset.npz'
 
 #%%Generate a meaningful filename to save the trainined models for testing
 print ('*************************************************')
